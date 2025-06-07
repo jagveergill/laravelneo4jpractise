@@ -1,11 +1,23 @@
 <?php
 
-use App\Http\Controllers\Neo4jDemoController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/neo4j-demo', [Neo4jDemoController::class, 'test']);
+Route::get('/dashboard', function () {
+    return auth()->user()->role === 'doctor'
+        ? view('dashboard-doctor')
+        : view('dashboard-patient');
+})->middleware(['auth'])->name('dashboard');
 
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
